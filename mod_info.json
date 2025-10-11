@@ -1,0 +1,10 @@
+{
+  "id":"tolerant_luddic_majority",
+  "name":"Tolerant Luddic Majority",
+  "author":"DonationBox && Exon Expedition",
+  "version":"2.0.0",
+  "description":"Luddic Majority now tolerates mining-adjacent and military industries, and in the Codex it now lists every rural and heavy industry along with all possible negating factors.",
+  "gameVersion":"0.98a-RC8",
+  "modPlugin":"tolerantmajority.TolerantMajorityModPlugin",
+  "jars":["jars/TolerantLuddicMajority.jar"]
+}
