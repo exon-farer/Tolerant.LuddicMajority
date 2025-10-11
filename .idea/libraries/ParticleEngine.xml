@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ParticleEngine">
+    <CLASSES>
+      <root url="jar://F:/Omega/Starsector/mods/Particle Engine/jars/ParticleEngine.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
