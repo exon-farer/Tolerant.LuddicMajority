@@ -104,9 +104,6 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         if (codex || !market.hasCondition(Conditions.HABITABLE)) {
             reasons.add("The colony is not habitable.");
         }
-        if (codex || market.hasCondition(Conditions.POLLUTION)) {
-            reasons.add("The colony suffers from severe pollution, making it unsuitable for the faithful.");
-        }
         if (codex || !hasRuralIndustry(market)) {
             String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
             reasons.add("The colony has no suitable employment for the faithful. (" + ruralList + ")");
