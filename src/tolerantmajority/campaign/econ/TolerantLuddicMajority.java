@@ -111,7 +111,6 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
             String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
             reasons.add("The colony has no suitable employment for the faithful. (" + ruralList + ")");
         }
-
         if (codex) {
             String heavyList = Misc.getAndJoined(getAllHeavyIndustryNames());
             reasons.add("The colony has heavy industrial facilities other than mining. (" + heavyList + ")");
