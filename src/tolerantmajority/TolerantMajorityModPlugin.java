@@ -3,9 +3,19 @@ package tolerantmajority;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.listeners.ColonySizeChangeListener;
+import tolerantmajority.campaign.TlmSettingsListener;
 import tolerantmajority.campaign.TolerantLuddicMajorityListener;
 
+import lunalib.lunaSettings.LunaSettings;
+
 public class TolerantMajorityModPlugin extends BaseModPlugin {
+
+    @Override
+    public void onApplicationLoad() throws Exception {
+        if (Global.getSettings().getModManager().isModEnabled("lunalib")) {
+            LunaSettings.addSettingsListener(new TlmSettingsListener());
+        }
+    }
 
     @Override
     public void onGameLoad(boolean newGame) {

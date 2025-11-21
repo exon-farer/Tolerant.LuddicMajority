@@ -15,6 +15,7 @@ import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import tolerantmajority.campaign.TlmSettingsListener;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -51,25 +52,50 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         return false;
     }
 
-    private static String getHeavyIndustryName(MarketAPI market) {
+    private static String hasHeavyIndustry(MarketAPI market) {
         for (Industry ind : market.getIndustries()) {
-            if (ind.getSpec().hasTag(Industries.TAG_INDUSTRIAL)
-                    && !ind.getSpec().hasTag(Industries.MINING)) {
-                return ind.getCurrentName();
+            if (ind.getSpec().hasTag(Industries.TAG_INDUSTRIAL)) {
+
+                // Skip mining if exemption is Mining or Tech-Mining
+                if ("Mining".equals(TlmSettingsListener.heavyIndustryExemption) && ind.getSpec().hasTag(Industries.MINING)) {
+                    continue;
+                }
+                // Skip mining and tech-mining if exemption is Tech-Mining
+                if ("Tech-Mining".equals(TlmSettingsListener.heavyIndustryExemption) &&
+                        (ind.getSpec().hasTag(Industries.MINING) || ind.getSpec().hasTag(Industries.TECHMINING))) {
+                    continue;
+                }
+
+                if (!ind.getSpec().hasTag(Industries.MINING) && !ind.getSpec().hasTag(Industries.TECHMINING)) {
+                    return ind.getCurrentName();
+                }
             }
         }
+
         if (market.getConstructionQueue() != null) {
             for (ConstructionQueueItem item : market.getConstructionQueue().getItems()) {
                 IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
-                if (spec != null && spec.hasTag(Industries.TAG_INDUSTRIAL)
-                        && !spec.hasTag(Industries.MINING)) {
-                    return spec.getName();
+                if (spec != null && spec.hasTag(Industries.TAG_INDUSTRIAL)) {
+
+                    if ("Mining".equals(TlmSettingsListener.heavyIndustryExemption) && spec.hasTag(Industries.MINING)) {
+                        continue;
+                    }
+                    if ("Tech-Mining".equals(TlmSettingsListener.heavyIndustryExemption) &&
+                            (spec.hasTag(Industries.MINING) || spec.hasTag(Industries.TECHMINING))) {
+                        continue;
+                    }
+
+                    if (!spec.hasTag(Industries.MINING) && !spec.hasTag(Industries.TECHMINING)) {
+                        return spec.getName();
+                    }
                 }
-                break;
+                break; // only check first in queue
             }
         }
+
         return null;
     }
+
 
     private static List<String> getAllRuralIndustryNames() {
         List<String> names = new ArrayList<>();
@@ -83,38 +109,61 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
 
     private static List<String> getAllHeavyIndustryNames() {
         List<String> names = new ArrayList<>();
+        String exemption = TlmSettingsListener.heavyIndustryExemption;
+
         for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
-            if (spec.hasTag(Industries.TAG_INDUSTRIAL) && !spec.hasTag(Industries.MINING)) {
-                names.add(spec.getName());
-            }
+            if (!spec.hasTag(Industries.TAG_INDUSTRIAL)) continue;
+
+            // Skip exempted industries based on user setting
+            if ("Mining".equals(exemption) && spec.hasTag(Industries.MINING)) continue;
+            if ("Tech-Mining".equals(exemption) &&
+                    (spec.hasTag(Industries.MINING) || spec.hasTag(Industries.TECHMINING))) continue;
+
+            // Include all other heavy industries
+            names.add(spec.getName());
         }
         return names;
     }
+
+
 
     public static List<String> getNegatingFactors(MarketAPI market) {
         List<String> reasons = new ArrayList<>();
         boolean codex = Global.CODEX_TOOLTIP_MODE;
 
-        if (codex || (market.getAdmin() != null && market.getAdmin().getId().equals(People.DARDAN_KATO))) {
-            reasons.add("Dardan Kato's \"policies.\"");
-        }
         if (codex || (market.isPlayerOwned() && LuddicChurchHostileActivityFactor.isMadeDeal())) {
-            reasons.add("An agreement with the Luddic Church suppresses Luddic migration.");
+            reasons.add("A formal pact with the Luddic Church suppresses Luddic migration to the colony.");
         }
-        if (codex || !market.hasCondition(Conditions.HABITABLE)) {
-            reasons.add("The colony is not habitable.");
+
+        if (TlmSettingsListener.enableKato) {
+            if (codex || (market.getAdmin() != null && People.DARDAN_KATO.equals(market.getAdmin().getId()))) {
+                reasons.add("Kato's policies actively suppress the Luddic faithful.");
+            }
         }
-        if (codex || !hasRuralIndustry(market)) {
-            String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
-            reasons.add("The colony has no suitable employment for the faithful. (" + ruralList + ")");
+
+        if (TlmSettingsListener.enableUninhabitable) {
+            if (codex || !market.hasCondition(Conditions.HABITABLE)) {
+                reasons.add("The colony is not habitable.");
+            }
         }
-        if (codex) {
-            String heavyList = Misc.getAndJoined(getAllHeavyIndustryNames());
-            reasons.add("The colony has heavy industrial facilities other than mining. (" + heavyList + ")");
-        } else {
-            String heavy = getHeavyIndustryName(market);
-            if (heavy != null) {
-                reasons.add("The colony has heavy industrial facilities other than mining. (" + heavy + ")");
+
+        if (TlmSettingsListener.enableNoRural) {
+            if (codex || !hasRuralIndustry(market)) {
+                String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
+                reasons.add("The colony has no suitable employment for the faithful. (" + ruralList + ")");
+            }
+        }
+
+        if (TlmSettingsListener.enablePollution) {
+            if (codex || market.hasCondition(Conditions.POLLUTION)) {
+                reasons.add("The colony has high pollution levels, making it unsuitable for the faithful.");
+            }
+        }
+
+        if (TlmSettingsListener.enableHeavyIndustry) {
+            String heavy = hasHeavyIndustry(market);
+            if (codex || heavy != null) {
+                reasons.add("The colony has heavy industrial facilities. (" + (heavy != null ? heavy : Misc.getAndJoined(getAllHeavyIndustryNames())) + ")");
             }
         }
 
@@ -128,10 +177,10 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
     // -------------------------
     // Tooltip
     // -------------------------
-
     public static void addConditions(TooltipMakerAPI tooltip, MarketAPI market, float opad) {
         List<String> reasons = getNegatingFactors(market);
 
+        // Only show negating factors if there are any
         if (!reasons.isEmpty()) {
             if (market.isPlayerOwned()) {
                 tooltip.addPara("The following factors result in these bonuses being negated, and, "
@@ -150,6 +199,7 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
             tooltip.setBulletedListMode(null);
         }
     }
+
 
     // -------------------------
     // Market effects
@@ -217,7 +267,6 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
         return 1f;
     }
-
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
         super.createTooltipAfterDescription(tooltip, expanded);
 
@@ -243,17 +292,11 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
 
         tooltip.addSpacer(10f);
-        if (Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("The following factors result in these bonuses being negated:", opad);
-            tooltip.setBulletedListMode("    - ");
-            for (String reason : getNegatingFactors(market)) {
-                tooltip.addPara(reason, opad);
-            }
-            tooltip.setBulletedListMode(null);
-        } else {
-            addConditions(tooltip, market, opad);
-        }
+
+        // Always use addConditions, which handles codex mode and empty lists correctly
+        addConditions(tooltip, market, opad);
     }
+
 
     public String getIconName() {
         if (!matchesBonusConditions(market)) {

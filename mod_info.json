@@ -8,5 +8,16 @@
   "modPlugin": "tolerantmajority.TolerantMajorityModPlugin",
   "jars": [
     "jars/TolerantLuddicMajority.jar"
+  ],
+  "dependencies":
+  [
+    {
+      "id": "lw_lazylib",
+      "name": "LazyLib"
+    },
+    {
+      "id": "lunalib",
+      "name": "LunaLib"
+    }
   ]
 }
