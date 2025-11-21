@@ -2,22 +2,22 @@
 
 ## Description
 
-This mod changes the **Luddic Majority** condition to be more tolerant towards certain industries.
-
-- Certain conditions, like **pollution**, non-mining heavy industry, can negate these bonuses.
+This mod adjusts the **Luddic Majority** condition to be more tolerant toward certain industries, while still accounting for factors that can negate its bonuses.
 
 ## Features
 
 - Overrides vanilla Luddic Church hostile activity behavior to prevent conflicts with modded bonuses.
-- Tooltips and Codex support explain bonuses and negating factors.
-
+- Tooltips and Codex support clearly explain bonuses and active negating factors.
+- Heavy industry can be partially exempted via mod settings (e.g., **Mining**, **Tech-Mining**) without removing the negating factor entirely.
+- Users can **disable any or all negating factors** via mod settings to ensure the bonuses always apply.
 ## Notes
 
 - Vanilla Luddic Church listeners that interfere with the condition are automatically removed, without affecting hostile activity events.
+- The mod dynamically adjusts colony bonuses based on active negating factors, affecting stability, production, and population growth.
 
 ## License
 
-Default: MIT.
+Default: MIT
 
 ## Author
 

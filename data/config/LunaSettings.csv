@@ -1,0 +1,20 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab,
+tlm_heavyIndustryExemption,Heavy Industry Exemption,Radio,Mining,"None, Mining, Tech-Mining",Select which types of heavy industry are ignored when calculating negating factors. 'Tech-Mining' ignores MINING and TECHMINING.,, ,,
+,,,,,,,,,
+tlm_negationHeader,Negating Factors,Header,Negating factors that disable Luddic Majority bonuses,,,,,,
+,,,,,,,,,
+tlm_enablePollutionNegation,Pollution,Boolean,true,,"Enabled: ""The faithful turn away from worlds scarred by mankind's excess; such places remind them of the sins that called the Great Collapse.""
+
+Disabled: ""Even scarred lands may still be welcomed by those seeking refuge; pollution does not sway the devoted.""",,,,
+tlm_enableHeavyIndustryNegation,Heavy Industry,Boolean,true,,"Enabled: ""Great furnaces and automated forges are monuments to mankind's pride - the very hubris Ludd taught us to abandon.""
+
+Disabled: ""The faithful are willing to coexist with industry; toil and iron need not deter them entirely.""",,,,
+tlm_enableNoRuralNegation,Lack of Rural Industry,Boolean,true,,"Enabled: ""Without simple rural work, the colony feels rootless, detached from the humble labors that honor Ludd's example.""
+
+Disabled: ""Even in the absence of traditional work, the faithful can find purpose among other labors.""",,,,
+tlm_enableUninhabitableNegation,Uninhabitable Colony,Boolean,true,,"Enabled: ""A world where life struggles to exist is taken as a sign: some places were not meant for humanity to tame, but to respect from afar.""
+
+Disabled: ""Harsh conditions are no barrier; the faithful may still endure where others falter.""",,,,
+tlm_enableKatoNegation,Dardan Kato,Boolean,true,,"Enabled: ""Kato's policies actively suppress the Luddic faithful, keeping their influence from spreading to the colony.""
+
+Disabled: ""Kato's measures are insufficient to deter the faithful; they continue to gather and grow despite his policies.""",,,,
