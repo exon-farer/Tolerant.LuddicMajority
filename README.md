@@ -13,7 +13,6 @@ This mod adjusts the **Luddic Majority** condition to be more tolerant toward ce
 ## Notes
 
 - Vanilla Luddic Church listeners that interfere with the condition are automatically removed, without affecting hostile activity events.
-- The mod dynamically adjusts colony bonuses based on active negating factors, affecting stability, production, and population growth.
 
 ## License
 
