@@ -1,6 +1,5 @@
 package tolerantmajority.campaign;
 
-import com.fs.starfarer.api.Global;
 import lunalib.lunaSettings.LunaSettings;
 import lunalib.lunaSettings.LunaSettingsListener;
 
@@ -13,12 +12,26 @@ public class TlmSettingsListener implements LunaSettingsListener {
     public static boolean enableUninhabitable;
     public static boolean enableKato;
 
-    // --- Heavy industry exemption ---
-    public static String heavyIndustryExemption;
+    // Industry IDs that are always exempt (comma-separated in LunaLib)
+    public static String heavyIndustryExemption = "";
 
     // Initialize values
     public TlmSettingsListener() {
         reloadSettings();
+    }
+
+    public static boolean isHeavyIndustryExempt(String industryId) {
+        if (heavyIndustryExemption == null || heavyIndustryExemption.isBlank()) {
+            return false;
+        }
+
+        for (String id : heavyIndustryExemption.split(",")) {
+            if (industryId.equalsIgnoreCase(id.trim())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -34,6 +47,6 @@ public class TlmSettingsListener implements LunaSettingsListener {
         enableUninhabitable = LunaSettings.getBoolean("tolerant_luddic_majority", "tlm_enableUninhabitableNegation");
         enableKato = LunaSettings.getBoolean("tolerant_luddic_majority", "tlm_enableKatoNegation");
 
-        heavyIndustryExemption = LunaSettings.getString("tolerant_luddic_majority", "tlm_heavyIndustryExemption");
+        heavyIndustryExemption = LunaSettings.getString("tolerant_luddic_majority", "tlm_heavyIndustryExemption").trim();
     }
 }

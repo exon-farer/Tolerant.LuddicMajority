@@ -2,15 +2,14 @@
   "id": "tolerant_luddic_majority",
   "name": "Tolerant Luddic Majority",
   "author": "DonationBox && Exon Expedition",
-  "version": "2.1.0",
-  "description": "Luddic Majority now tolerates mining-adjacent and military industries, and in the Codex it now lists every rural and heavy industry along with all possible negating factors. Pollution is now a negating factor.",
+  "version": "3.1.0",
+  "description": "Luddic Majority now tolerates military industries by default, and pollution has been added as a new negating factor. The Codex has also been expanded to list all rural and heavy industries recognized by the mod, along with every possible negating factor. Each negating factor can be individually enabled or disabled to better suit your preferred playstyle.",
   "gameVersion": "0.98a-RC8",
   "modPlugin": "tolerantmajority.TolerantMajorityModPlugin",
   "jars": [
     "jars/TolerantLuddicMajority.jar"
   ],
-  "dependencies":
-  [
+  "dependencies": [
     {
       "id": "lw_lazylib",
       "name": "LazyLib"

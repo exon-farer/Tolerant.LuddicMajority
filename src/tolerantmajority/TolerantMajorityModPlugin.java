@@ -3,10 +3,9 @@ package tolerantmajority;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.listeners.ColonySizeChangeListener;
+import lunalib.lunaSettings.LunaSettings;
 import tolerantmajority.campaign.TlmSettingsListener;
 import tolerantmajority.campaign.TolerantLuddicMajorityListener;
-
-import lunalib.lunaSettings.LunaSettings;
 
 public class TolerantMajorityModPlugin extends BaseModPlugin {
 

@@ -54,48 +54,35 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
 
     private static String hasHeavyIndustry(MarketAPI market) {
         for (Industry ind : market.getIndustries()) {
-            if (ind.getSpec().hasTag(Industries.TAG_INDUSTRIAL)) {
-
-                // Skip mining if exemption is Mining or Tech-Mining
-                if ("Mining".equals(TlmSettingsListener.heavyIndustryExemption) && ind.getSpec().hasTag(Industries.MINING)) {
-                    continue;
-                }
-                // Skip mining and tech-mining if exemption is Tech-Mining
-                if ("Tech-Mining".equals(TlmSettingsListener.heavyIndustryExemption) &&
-                        (ind.getSpec().hasTag(Industries.MINING) || ind.getSpec().hasTag(Industries.TECHMINING))) {
-                    continue;
-                }
-
-                if (!ind.getSpec().hasTag(Industries.MINING) && !ind.getSpec().hasTag(Industries.TECHMINING)) {
-                    return ind.getCurrentName();
-                }
+            if (!ind.getSpec().hasTag(Industries.TAG_INDUSTRIAL)) {
+                continue;
             }
+
+            if (TlmSettingsListener.isHeavyIndustryExempt(ind.getId())) {
+                continue;
+            }
+
+            return ind.getCurrentName();
         }
 
         if (market.getConstructionQueue() != null) {
             for (ConstructionQueueItem item : market.getConstructionQueue().getItems()) {
                 IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
+
                 if (spec != null && spec.hasTag(Industries.TAG_INDUSTRIAL)) {
-
-                    if ("Mining".equals(TlmSettingsListener.heavyIndustryExemption) && spec.hasTag(Industries.MINING)) {
-                        continue;
-                    }
-                    if ("Tech-Mining".equals(TlmSettingsListener.heavyIndustryExemption) &&
-                            (spec.hasTag(Industries.MINING) || spec.hasTag(Industries.TECHMINING))) {
+                    if (TlmSettingsListener.isHeavyIndustryExempt(spec.getId())) {
                         continue;
                     }
 
-                    if (!spec.hasTag(Industries.MINING) && !spec.hasTag(Industries.TECHMINING)) {
-                        return spec.getName();
-                    }
+                    return spec.getName();
                 }
+
                 break; // only check first in queue
             }
         }
 
         return null;
     }
-
 
     private static List<String> getAllRuralIndustryNames() {
         List<String> names = new ArrayList<>();
@@ -109,23 +96,44 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
 
     private static List<String> getAllHeavyIndustryNames() {
         List<String> names = new ArrayList<>();
-        String exemption = TlmSettingsListener.heavyIndustryExemption;
 
         for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
-            if (!spec.hasTag(Industries.TAG_INDUSTRIAL)) continue;
+            if (!spec.hasTag(Industries.TAG_INDUSTRIAL)) {
+                continue;
+            }
 
-            // Skip exempted industries based on user setting
-            if ("Mining".equals(exemption) && spec.hasTag(Industries.MINING)) continue;
-            if ("Tech-Mining".equals(exemption) &&
-                    (spec.hasTag(Industries.MINING) || spec.hasTag(Industries.TECHMINING))) continue;
+            if (TlmSettingsListener.isHeavyIndustryExempt(spec.getId())) {
+                continue;
+            }
 
-            // Include all other heavy industries
             names.add(spec.getName());
         }
+
         return names;
     }
 
+    private static String getHeavyIndustryExemptionNames() {
+        if (TlmSettingsListener.heavyIndustryExemption.isBlank()) {
+            return "None";
+        }
 
+        List<String> names = new ArrayList<>();
+
+        for (String id : TlmSettingsListener.heavyIndustryExemption.split(",")) {
+            id = id.trim();
+            if (id.isEmpty()) continue;
+
+            IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(id);
+            if (spec != null) {
+                names.add(spec.getName());
+            } else {
+                // Unknown ID; show it as entered so the player can spot typos.
+                names.add(id);
+            }
+        }
+
+        return Misc.getAndJoined(names);
+    }
 
     public static List<String> getNegatingFactors(MarketAPI market) {
         List<String> reasons = new ArrayList<>();
@@ -137,7 +145,7 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
 
         if (TlmSettingsListener.enableKato) {
             if (codex || (market.getAdmin() != null && People.DARDAN_KATO.equals(market.getAdmin().getId()))) {
-                reasons.add("Kato's policies actively suppress the Luddic faithful.");
+                reasons.add("The colony's leadership actively suppress the Luddic faithful.");
             }
         }
 
@@ -163,7 +171,16 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         if (TlmSettingsListener.enableHeavyIndustry) {
             String heavy = hasHeavyIndustry(market);
             if (codex || heavy != null) {
-                reasons.add("The colony has heavy industrial facilities. (" + (heavy != null ? heavy : Misc.getAndJoined(getAllHeavyIndustryNames())) + ")");
+
+                String shownIndustries = heavy != null
+                        ? heavy
+                        : Misc.getAndJoined(getAllHeavyIndustryNames());
+
+                reasons.add("The colony has heavy industrial facilities. (" + shownIndustries + ")");
+
+                if (codex && !TlmSettingsListener.heavyIndustryExemption.isBlank()) {
+                    reasons.add("Exempted industries: (" + getHeavyIndustryExemptionNames() + ")");
+                }
             }
         }
 
@@ -251,10 +268,6 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
     }
 
-    // -------------------------
-    // Helpers
-    // -------------------------
-
     public float getImmigrationBonus(boolean withEffectMult) {
         float bonus = IMMIGRATION_BASE * market.getSize();
         if (withEffectMult) bonus *= getEffectMult();
@@ -267,6 +280,7 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
         return 1f;
     }
+
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
         super.createTooltipAfterDescription(tooltip, expanded);
 
