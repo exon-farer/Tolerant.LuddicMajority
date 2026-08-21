@@ -140,31 +140,31 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         boolean codex = Global.CODEX_TOOLTIP_MODE;
 
         if (codex || (market.isPlayerOwned() && LuddicChurchHostileActivityFactor.isMadeDeal())) {
-            reasons.add("A formal pact with the Luddic Church suppresses Luddic migration to the colony.");
+            reasons.add("A formal agreement with the Luddic Church has curtailed the flow of immigration.");
         }
 
         if (TlmSettingsListener.enableKato) {
             if (codex || (market.getAdmin() != null && People.DARDAN_KATO.equals(market.getAdmin().getId()))) {
-                reasons.add("The colony's leadership actively suppress the Luddic faithful.");
+                reasons.add("The colony's leadership actively suppress the Luddic faith.");
             }
         }
 
         if (TlmSettingsListener.enableUninhabitable) {
             if (codex || !market.hasCondition(Conditions.HABITABLE)) {
-                reasons.add("The colony is not habitable.");
+                reasons.add("The colony lacks a naturally habitable environment.");
             }
         }
 
         if (TlmSettingsListener.enableNoRural) {
             if (codex || !hasRuralIndustry(market)) {
                 String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
-                reasons.add("The colony has no suitable employment for the faithful. (" + ruralList + ")");
+                reasons.add("The colony offers no suitable employment for the faithful. (" + ruralList + ")");
             }
         }
 
         if (TlmSettingsListener.enablePollution) {
             if (codex || market.hasCondition(Conditions.POLLUTION)) {
-                reasons.add("The colony has high pollution levels, making it unsuitable for the faithful.");
+                reasons.add("The colony's environment is heavily polluted.");
             }
         }
 
@@ -179,7 +179,8 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
                 reasons.add("The colony has heavy industrial facilities. (" + shownIndustries + ")");
 
                 if (codex && !TlmSettingsListener.heavyIndustryExemption.isBlank()) {
-                    reasons.add("Exempted industries: (" + getHeavyIndustryExemptionNames() + ")");
+                    reasons.add("The following heavy industrial facilities are, for one reason or another, " +
+                            "tolerated by the faithful: (" + getHeavyIndustryExemptionNames() + ")");
                 }
             }
         }
@@ -283,6 +284,7 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
 
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
         super.createTooltipAfterDescription(tooltip, expanded);
+        float mult = getEffectMult();
 
         String name = market.getName();
         float opad = 10f;
@@ -293,16 +295,30 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         tooltip.addPara("For colonies outside the core, it may also result in increased population growth, "
                 + "from Luddic immigrants seeking to escape the sometimes oppressive influence of the Luddic Church.", opad);
 
-        tooltip.addPara("%s stability", opad, Misc.getHighlightColor(), "+" + (int) STABILITY);
+        tooltip.addPara("%s stability",
+                opad,
+                Misc.getHighlightColor(),
+                "+" + (int) Math.round(STABILITY * mult));
 
         String ruralList = Misc.getAndJoined(getAllRuralIndustryNames());
         tooltip.addPara("%s production for " + ruralList,
-                opad, Misc.getHighlightColor(), "+" + (int) PRODUCTION_BASE_RURAL);
+                opad,
+                Misc.getHighlightColor(),
+                "+" + (int) Math.round(PRODUCTION_BASE_RURAL * mult));
 
         if (market.isPlayerOwned()) {
             tooltip.addPara("%s population growth",
-                    opad, Misc.getHighlightColor(),
+                    opad,
+                    Misc.getHighlightColor(),
                     "+" + (int) getImmigrationBonus(false));
+        }
+
+        if (market.isPlayerOwned() && LuddicChurchHostileActivityFactor.isDefeatedExpedition()) {
+            tooltip.addPara(
+                    "The bonus is doubled due to the faithful " + market.getOnOrAt() + " " +
+                            market.getName() + " feeling securely out from under the direct "
+                            + "influence of the Luddic Church.",
+                    opad, Misc.getPositiveHighlightColor(), "doubled");
         }
 
         tooltip.addSpacer(10f);
@@ -318,4 +334,13 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
         return super.getIconName();
     }
+
+    public String getName() {
+        if (!matchesBonusConditions(market)) {
+            return Global.getSettings().getSpriteName("events", "luddic_majority_unhappy");
+        }
+        return super.getIconName();
+    }
+
+
 }
