@@ -6,10 +6,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
-import com.fs.starfarer.api.impl.campaign.ids.Conditions;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
-import com.fs.starfarer.api.impl.campaign.ids.Industries;
-import com.fs.starfarer.api.impl.campaign.ids.People;
+import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.intel.events.LuddicChurchHostileActivityFactor;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
@@ -144,8 +141,10 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
 
         if (TlmSettingsListener.enableKato) {
-            if (codex || (market.getAdmin() != null && People.DARDAN_KATO.equals(market.getAdmin().getId()))) {
-                reasons.add("The colony's leadership actively suppress the Luddic faith.");
+            if (codex || (market.getAdmin() != null &&
+                    (People.DARDAN_KATO.equals(market.getAdmin().getId()) ||
+                            market.getAdmin().hasTag(Tags.ANTI_LUDDIC_ADMIN)))) {
+                reasons.add("The colony's administration policies actively suppress the Luddic faith.");
             }
         }
 
@@ -334,13 +333,5 @@ public class TolerantLuddicMajority extends BaseMarketConditionPlugin implements
         }
         return super.getIconName();
     }
-
-    public String getName() {
-        if (!matchesBonusConditions(market)) {
-            return Global.getSettings().getSpriteName("events", "luddic_majority_unhappy");
-        }
-        return super.getIconName();
-    }
-
 
 }
